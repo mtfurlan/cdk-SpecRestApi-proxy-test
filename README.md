@@ -1,14 +1,17 @@
-# Welcome to your CDK TypeScript project
+# SpecRestApi {proxy+} issue demonstrator
+This stack has a lambda at /hello-world and also hosts the contents of the
+`docs` dir with {proxy+} so you can view the openapi specification in a fancy
+GUI.
 
-This is a blank project for CDK development with TypeScript.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+The issue is that if you change the openAPI specification, the {proxy+} endpoint
+dissippears, you can see it before and after in the console.
 
-## Useful commands
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+To see the issue:
+* deploy this stack
+* see that the swagger UI works
+* change a description in `swagger.json`
+* redeploy
+* see that the swagger UI doesn't work
+

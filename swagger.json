@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "test api",
+    "description": "testing"
+  },
+  "servers": [
+    {
+      "url": "/prod"
+    }
+  ],
+  "paths": {
+    "/prod/hello-world": {
+      "get": {
+        "description": "hi stuff",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "x-amazon-apigateway-request-validators":{"basic":{"validateRequestParameters":true}},
+        "x-amazon-apigateway-integration":{
+          "uri":"REPLACE_ME",
+          "responses":{"default":{"statusCode":"200"}},
+          "passthroughBehavior":"when_no_match",
+          "httpMethod":"POST",
+          "type":"aws_proxy"
+        }
+      }
+    }
+  }
+}

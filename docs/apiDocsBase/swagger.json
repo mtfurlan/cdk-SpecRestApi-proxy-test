@@ -1,0 +1,292 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "PSS WZDx API",
+    "description": "PSS WZDx API for connected equipment"
+  },
+  "servers": [
+    {
+      "url": "${serverURL}"
+    }
+  ],
+  "tags": [
+    {
+      "name": "debug",
+      "description": "debug endpoints"
+    },
+    {
+      "name": "dataInjestion",
+      "description": "input data from devices"
+    },
+    {
+      "name": "wzdxFeeds",
+      "description": "spec compliant WZDX feeds"
+    }
+  ],
+  "paths": {
+    "/debug": {
+      "get": {
+        "tags": [
+          "debug"
+        ],
+        "description": "debug data",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/wzdx": {
+      "get": {
+        "tags": [
+          "wzdxFeeds"
+        ],
+        "description": "Returns the WZDx feed",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "debug"
+        ],
+        "description": "version of code deployed",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/homebaseStatus": {
+      "post": {
+        "tags": [
+          "dataInjestion"
+        ],
+        "description": "endpoint to store homebase status reports",
+        "requestBody": {
+          "description": "post homebase status",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/homebaseStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/deviceStatus": {
+      "post": {
+        "tags": [
+          "dataInjestion"
+        ],
+        "description": "endpoint to store non-homebase status reports",
+        "requestBody": {
+          "description": "Post device status",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/deviceStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "location": {
+        "type": "object",
+        "description": "WGS84",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "example": 42.48744686539853
+          },
+          "lng": {
+            "type": "number",
+            "example": -83.1468723626449
+          },
+          "elevation": {
+            "type": "number",
+            "description": "meters above WGS84 MSL",
+            "example": 202
+          }
+        }
+      },
+      "statusMessages": {
+        "type": "array",
+        "description": "A list of messages associated with the device's status, if applicable. Used to provide additional information about the status such as specific warning or error messages.",
+        "items": {
+          "type": "string",
+          "example": "some log or something"
+        }
+      },
+      "FieldDeviceStatus": {
+        "type": "string",
+        "description": "The FieldDeviceStatus enumerated type describes the operational status of a field device. The status indicates the health of the device.",
+        "enum": [
+          "ok",
+          "warning",
+          "error",
+          "unknown"
+        ]
+      },
+      "messageVersion": {
+        "type": "string",
+        "description": "version of the data format in this message",
+        "pattern": "^\\d+\\.\\d+\\.\\d+$",
+        "example": "3.2.1"
+      },
+      "deviceVersion": {
+        "type": "object",
+        "description": "all the fields to tell us what device and version a thing is",
+        "properties": {
+          "firmwareVersion": {
+            "type": "string",
+            "description": "The version of firmware the device is using to operate.",
+            "example": "v0.0.1-2-g3a7b818-feat/version-endpoint"
+          },
+          "make": {
+            "type": "string",
+            "description": "The make or manufacturer of the device.",
+            "example": "Tome"
+          },
+          "model": {
+            "type": "string",
+            "description": "The model of the device.",
+            "example": "Fancy Cone"
+          },
+          "serial": {
+            "type": "string",
+            "description": "The serial number of the device.",
+            "example": "13151251251251251"
+          }
+        }
+      },
+      "status": {
+        "type": "object",
+        "description": "common status fields",
+        "required": [
+          "mac"
+        ],
+        "properties": {
+          "mac": {
+            "type": "string",
+            "example": "DE:AD:BE:EF:AA:BB"
+          },
+          "uptime": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1693419267
+          },
+          "device_status": {
+            "$ref": "#/components/schemas/FieldDeviceStatus"
+          },
+          "status_messages": {
+            "$ref": "#/components/schemas/statusMessages"
+          },
+          "sensors": {
+            "type": "object",
+            "properties": {
+              "batteryLevel": {
+                "type": "integer",
+                "format": "float",
+                "description": "battery percentage",
+                "example": 42.2
+              },
+              "onBattery": {
+                "type": "boolean"
+              },
+              "chipTemperature": {
+                "type": "integer",
+                "format": "float",
+                "description": "temperature of the internal chip in degrees C",
+                "example": 42.2
+              },
+              "location": {
+                "$ref": "#/components/schemas/location"
+              }
+            }
+          },
+          "deviceVersion": {
+            "$ref": "#/components/schemas/deviceVersion"
+          }
+        }
+      },
+      "deviceStatus": {
+        "type": "object",
+        "description": "status of non-homebase devices",
+        "required": [
+          "version",
+          "status"
+        ],
+        "properties": {
+          "version": {
+            "$ref": "#/components/schemas/messageVersion"
+          },
+          "status": {
+            "$ref": "#/components/schemas/status"
+          }
+        }
+      },
+      "homebaseStatus": {
+        "type": "object",
+        "description": "status of homebase devices",
+        "required": [
+          "version",
+          "status"
+        ],
+        "properties": {
+          "version": {
+            "$ref": "#/components/schemas/messageVersion"
+          },
+          "status": {
+            "$ref": "#/components/schemas/status"
+          },
+          "workerLastSeen": {
+            "type": "integer",
+            "format": "int64",
+            "description": "seconds since last worker seen",
+            "example": 1693419267
+          },
+          "networkStatus": {
+            "type": "object",
+            "properties": {
+              "networkBytesRemaining": {
+                "type": "integer",
+                "example": 42
+              },
+              "ipv4Addr": {
+                "type": "string",
+                "example": "67.143.121.45"
+              },
+              "imei": {
+                "type": "string",
+                "example": "I dunno what an IMEI looks like - ALEXA TEST"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
